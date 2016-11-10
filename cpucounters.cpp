@@ -1018,13 +1018,15 @@ bool PCM::initMSR()
         // failed
         MSR.clear();
 
-        std::cerr << "Can not access CPUs Model Specific Registers (MSRs)." << std::endl;
 #ifdef _MSC_VER
+        std::cerr << "Can not access CPUs Model Specific Registers (MSRs)." << std::endl;
         std::cerr << "You must have signed msr.sys driver in your current directory and have administrator rights to run this program." << std::endl;
 #elif defined(__linux__)
-        std::cerr << "Try to execute 'modprobe msr' as root user and then" << std::endl;
-        std::cerr << "you also must have read and write permissions for /dev/cpu/*/msr devices (/dev/msr* for Android). The 'chown' command can help." << std::endl;
+        throw std::runtime_error("Cannot access the CPUs Model Specific Registers (MSRs).\n"
+				"Try to execute 'modprobe msr' as root and check if you have read and write permissions for /dev/cpu/*/msr devices (/dev/msr* for Android).\n"
+				"The 'chown' command can help.");
 #elif defined(__FreeBSD__)
+        std::cerr << "Can not access CPUs Model Specific Registers (MSRs)." << std::endl;
         std::cerr << "Ensure cpuctl module is loaded and that you have read and write" << std::endl;
         std::cerr << "permissions for /dev/cpuctl* devices (the 'chown' command can help)." << std::endl;
 #endif
@@ -1066,7 +1068,7 @@ bool PCM::detectNominalFrequency()
 		    return false;
         }
 
-        std::cerr << "Nominal core frequency: " << nominal_frequency << " Hz" << std::endl;
+        // std::cerr << "Nominal core frequency: " << nominal_frequency << " Hz" << std::endl;
     }
 
     return true;
@@ -1093,9 +1095,9 @@ void PCM::initEnergyMonitoring()
         pkgMinimumPower = (int32) (double(extract_bits(package_power_info, 16, 30))*wattsPerPowerUnit);
         pkgMaximumPower = (int32) (double(extract_bits(package_power_info, 32, 46))*wattsPerPowerUnit);
 
-        std::cerr << "Package thermal spec power: "<< pkgThermalSpecPower << " Watt; ";
-        std::cerr << "Package minimum power: "<< pkgMinimumPower << " Watt; ";
-        std::cerr << "Package maximum power: "<< pkgMaximumPower << " Watt; " << std::endl;
+        // std::cerr << "Package thermal spec power: "<< pkgThermalSpecPower << " Watt; ";
+        // std::cerr << "Package minimum power: "<< pkgMinimumPower << " Watt; ";
+        // std::cerr << "Package maximum power: "<< pkgMaximumPower << " Watt; " << std::endl;
 
         int i = 0;
 
@@ -1296,7 +1298,7 @@ PCM::PCM() :
 
     if(!discoverSystemTopology()) return;
 
-    printSystemTopology();
+    // printSystemTopology();
 
     if(!initMSR()) return;
 
@@ -2330,7 +2332,7 @@ void PCM::cleanupPMU()
     if(cpu_model == JAKETOWN)
         enableJKTWorkaround(false);
 
-    std::cerr << " Zeroed PMU registers" << std::endl;
+    // std::cerr << " Zeroed PMU registers" << std::endl;
 }
 
 void PCM::resetPMU()
@@ -2363,7 +2365,7 @@ void PCM::resetPMU()
             MSR[i]->write(IA32_CR_FIXED_CTR_CTRL, 0);
     }
 
-    std::cerr << " Zeroed PMU registers" << std::endl;
+    // std::cerr << " Zeroed PMU registers" << std::endl;
 }
 void PCM::freeRMID()
 {
@@ -2396,7 +2398,7 @@ void PCM::freeRMID()
 	}
 
 
-	std::cerr << " Freeing up all RMIDs" << std::endl;
+	// std::cerr << " Freeing up all RMIDs" << std::endl;
 }
 
 void PCM::setOutput(const std::string filename)
@@ -2420,10 +2422,10 @@ void PCM::restoreOutput()
 void PCM::cleanup()
 {
     InstanceLock lock(allow_multiple_instances);
-    
+
     if (MSR.empty()) return;
-    
-    std::cerr << "Cleaning up" << std::endl;
+
+    // std::cerr << "Cleaning up" << std::endl;
 
     if (decrementInstanceSemaphore())
         cleanupPMU();
@@ -3681,13 +3683,13 @@ ServerPCICFGUncore::ServerPCICFGUncore(uint32 socket_, PCM * pcm) :
          *  is possible with single socket systems.
          */
         qpiLLHandles.clear();
-        std::cerr << num_imc << " memory controllers detected with total number of " << imcHandles.size() << " channels. " << std::endl;
+        // std::cerr << num_imc << " memory controllers detected with total number of " << imcHandles.size() << " channels. " << std::endl;
         return;
     }
 
 #ifdef PCM_NOQPI
     qpiLLHandles.clear();
-    std::cerr << num_imc<<" memory controllers detected with total number of "<< imcHandles.size() <<" channels. " << std::endl;
+    // std::cerr << num_imc<<" memory controllers detected with total number of "<< imcHandles.size() <<" channels. " << std::endl;
     return;
 #else
 
